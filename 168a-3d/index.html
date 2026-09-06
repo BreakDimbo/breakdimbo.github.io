@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<!--
+Three.js r140 and bundled example controls/loaders
+Copyright 2010-2022 Three.js Authors
+License: MIT
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+The published build loads Three.js r140 from a public CDN with a fallback.
+The portable offline build retains its bundled copy.
+No font files are bundled. Typography uses the device's system fonts.
+The source blueprint is supplied by the user, and its rights remain with
+its respective owner.
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<meta name="theme-color" content="#eeede7"/>
+<meta name="description" content="依据 168A 双户型建筑截图描摹的 Three.js 交互式三维模型。支持剖切墙高、原图对照、房间选择与 GLB 导出。"/>
+<title>AXIS — 168A 空间重构</title>
+<link rel="stylesheet" href="./style.css"/>
+</head>
+<body>
+<svg class="svg-defs" aria-hidden="true"><defs>
+<symbol id="i-cube" viewBox="0 0 24 24"><path d="m12 3 9 5v9l-9 5-9-5V8l9-5Zm0 10 9-5M12 13 3 8m9 5v9"/></symbol>
+<symbol id="i-plan" viewBox="0 0 24 24"><path d="M3 3h18v18H3V3Zm9 0v8h9M3 14h9v7m0-7v-3"/></symbol>
+<symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3 10 6-10 6L2 9l10-6Zm-10 12 10 6 10-6M2 12l10 6 10-6"/></symbol>
+<symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 19 19 5M6 5h13v13"/></symbol>
+<symbol id="i-down" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></symbol>
+<symbol id="i-source" viewBox="0 0 24 24"><path d="M3 4h18v16H3zM12 4v16M6 8h3m-3 4h3m6-4h3m-3 4h3"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+<symbol id="i-reset" viewBox="0 0 24 24"><path d="M4 10a8 8 0 1 1 1 7M4 4v6h6"/></symbol>
+<symbol id="i-measure" viewBox="0 0 24 24"><path d="m3 16 13-13 5 5L8 21l-5-5Zm4-4 3 3m0-6 2 2m1-5 3 3"/></symbol>
+<symbol id="i-full" viewBox="0 0 24 24"><path d="M9 3H3v6m12-6h6v6M3 15v6h6m12-6v6h-6"/></symbol>
+<symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+<symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v1"/></symbol>
+<symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3"/><circle cx="15" cy="17" r="3"/></symbol>
+<symbol id="i-chair" viewBox="0 0 24 24"><path d="M6 12V4h12v8M4 10v7h16v-7M7 17v4m10-4v4M4 14h16"/></symbol>
+<symbol id="i-window" viewBox="0 0 24 24"><path d="M4 3h16v18H4zM12 3v18M4 12h16"/></symbol>
+<symbol id="i-tag" viewBox="0 0 24 24"><path d="M3 4h10l8 8-9 9-9-9V4Z"/><circle cx="8" cy="9" r="1.3"/></symbol>
+<symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+<symbol id="i-floor" viewBox="0 0 24 24"><path d="m3 15 9-6 9 6-9 6-9-6Zm0-6 9-6 9 6"/></symbol>
+</defs></svg>
+<header class="header">
+ <div class="brand"><button id="menu-toggle" class="icon-button mobile-only" title="打开项目面板" aria-label="打开项目面板"><svg><use href="#i-menu"/></svg></button><div class="brand-mark"><svg><use href="#i-plan"/></svg></div><span class="brand-word">AXIS<span class="brand-dot">.</span></span><span class="brand-divider"></span><span class="brand-sub">空间重构</span></div>
+ <div class="header-center"><span>PROJECT 001</span><b>168A · 双户型</b></div>
+ <div class="header-actions"><button id="compare-button" class="button secondary"><svg><use href="#i-source"/></svg><span>原图对照</span></button><button id="export-button" class="button primary"><svg><use href="#i-down"/></svg><span>导出模型</span></button></div>
+</header>
+<div class="app-body">
+<aside class="sidebar" id="sidebar">
+ <div class="project-heading"><span class="eyebrow">PLAN → SPACE</span><h1>168A 户型复原<span class="project-dot"></span></h1><p>从二维图纸，走进三维空间。</p><button id="accuracy-button" class="accuracy-badge"><i></i>截图参考重建<svg><use href="#i-info"/></svg></button></div>
+ <div class="sidebar-scroll">
+ <section class="panel-section"><div class="section-title"><h2>空间导航</h2><span>01 — 04</span></div>
+  <div class="zone-nav">
+   <button data-zone="all" class="zone-item active"><span class="zone-icon"><svg><use href="#i-layers"/></svg></span><span class="zone-text"><strong>整层总览</strong><small>两个住户与中央核心筒</small></span><span class="zone-number">01</span></button>
+   <button data-zone="left" class="zone-item"><span class="zone-letter">A</span><span class="zone-text"><strong>左侧住户</strong><small>三卧 · 双卫 · 双阳台</small></span><span class="zone-number">02</span></button>
+   <button data-zone="right" class="zone-item"><span class="zone-letter">B</span><span class="zone-text"><strong>右侧住户</strong><small>近似镜像布局</small></span><span class="zone-number">03</span></button>
+   <button data-zone="core" class="zone-item"><span class="zone-letter">C</span><span class="zone-text"><strong>公共区域</strong><small>双电梯 · 楼梯 · 大堂</small></span><span class="zone-number">04</span></button>
+  </div>
+ </section>
+ <section class="panel-section layer-section"><div class="section-title"><h2>可视图层</h2><span>LAYERS</span></div>
+  <label class="layer-row"><svg><use href="#i-chair"/></svg><span>示意家具</span><input data-layer="furniture" type="checkbox" checked/><i class="switch"></i></label>
+  <label class="layer-row"><svg><use href="#i-window"/></svg><span>窗与阳台栏杆</span><input data-layer="windows" type="checkbox" checked/><i class="switch"></i></label>
+  <label class="layer-row"><svg><use href="#i-tag"/></svg><span>房间标注</span><input data-layer="labels" type="checkbox" checked/><i class="switch"></i></label>
+  <label class="layer-row"><svg><use href="#i-measure"/></svg><span>参考尺寸</span><input data-layer="dimensions" type="checkbox"/><i class="switch"></i></label>
+  <label class="layer-row"><svg><use href="#i-source"/></svg><span>底图叠加</span><input data-layer="underlay" type="checkbox"/><i class="switch"></i></label>
+ </section>
+ <section class="panel-section cut-section"><div class="section-title"><h2>墙体显示高度</h2><output id="cut-value">1.35 m</output></div><input id="cut-range" aria-label="墙体显示高度" type="range" min="0.20" max="3" step="0.05" value="1.35"/><div class="cut-presets"><button data-cut=".30">低墙</button><button data-cut="1.35">半高</button><button data-cut="full">完整墙高</button></div></section>
+ <section class="panel-section material-section"><div class="section-title"><h2>模型表达</h2><span>STYLE</span></div><div class="material-switch"><button class="active" data-material="warm"><i class="swatch warm"></i>自然材质</button><button data-material="white"><i class="swatch white"></i>建筑白模</button></div></section>
+ <div id="room-card" class="room-card"><div class="room-card-top"><span id="room-unit">A / 左侧住户</span><svg><use href="#i-floor"/></svg></div><div class="room-main"><div><h3 id="room-name">客厅</h3><p>SELECTED SPACE</p></div><div id="room-area">19.57<small>m²</small></div></div><div class="room-card-bottom"><span id="room-note">图纸标注面积 · 非模型实测</span><button id="room-focus" aria-label="聚焦所选房间" title="聚焦所选房间"><svg><use href="#i-arrow"/></svg></button></div></div>
+ </div>
+ <div class="sidebar-bottom"><button id="calibrate-button"><svg><use href="#i-settings"/></svg><span>尺寸与层高校准</span><svg class="arrow"><use href="#i-arrow"/></svg></button></div>
+</aside>
+<main class="main">
+ <div class="workspace" id="workspace">
+  <section class="stage" id="stage">
+   <div id="webgl"></div><div id="labels" class="labels"></div>
+   <img id="source-fallback" hidden alt="原始建筑图纸"/>
+   <div class="stage-heading"><div><span id="view-number">01</span><h2 id="viewport-label">轴测总览 / AXONOMETRIC</h2></div><p id="view-subtitle">整层空间 · 截图参考重建</p></div>
+   <div class="stage-info"><span class="live-dot"></span><span>THREE.JS</span><i></i><span id="height-mode">剖切模式</span></div>
+   <div class="compass" title="图纸上方；不代表地理北向"><div id="compass-arrow"><span>图上</span><svg viewBox="0 0 40 40"><path d="M20 4 25 28 20 24 15 28Z" fill="currentColor" stroke="none"/><circle cx="20" cy="20" r="17"/></svg></div></div>
+   <div class="view-tools">
+    <button id="zoom-in" title="放大" aria-label="放大"><svg><use href="#i-plus"/></svg></button><button id="zoom-out" title="缩小" aria-label="缩小"><svg><use href="#i-minus"/></svg></button><hr/>
+    <button id="reset-button" title="重置视角 · R" aria-label="重置视角"><svg><use href="#i-reset"/></svg></button><button id="measure-button" title="两点参考测距 · M" aria-label="两点参考测距"><svg><use href="#i-measure"/></svg></button><button id="fullscreen-button" title="全屏" aria-label="全屏"><svg><use href="#i-full"/></svg></button>
+   </div>
+   <div id="measure-hint" class="measure-hint" hidden>依次点击地面两点 · 数值基于当前比例 · Esc 退出</div>
+   <div class="view-toolbar"><div class="view-mode"><button data-view="iso" class="active"><svg><use href="#i-cube"/></svg>三维</button><button data-view="top"><svg><use href="#i-plan"/></svg>俯视</button><button data-view="plan"><svg><use href="#i-source"/></svg>图纸</button></div><span class="toolbar-divider"></span><button id="rotate-button" class="rotate-button" title="自动环绕" aria-label="自动环绕"><svg><use href="#i-reset"/></svg></button></div>
+   <div class="stage-caption"><span class="caption-line"></span><span>以结构为起点，让空间被看见。</span></div>
+   <div id="blueprint-view" class="blueprint-view" hidden><div class="drawing-stage"><div class="drawing-transform"><img class="drawing-image" alt="用户提供的 168A 双户型建筑平面图" draggable="false"/><div class="trace-layer"></div></div></div><div class="blueprint-controls"><label><input type="checkbox" id="trace-toggle"/>显示描摹墙线</label><button id="drawing-reset">复位</button><button id="drawing-download">保存原图<svg><use href="#i-down"/></svg></button></div><p class="drawing-caption">原始截图 / 1487 × 873 px · 滚轮缩放、拖动平移 · 绿色为描摹墙线，浅黄色为洞口</p></div>
+   <div id="loading"><div class="loading-logo">A<span>↗</span></div><strong>正在建立空间</strong><p>墙体 · 门窗 · 双户型 · 核心筒</p></div>
+  </section>
+  <aside id="comparison" class="comparison" hidden><div class="comparison-heading"><span>源图对照 <i>SOURCE</i></span><button class="icon-button" id="close-compare" title="关闭对照" aria-label="关闭对照"><svg><use href="#i-close"/></svg></button></div><div class="drawing-stage"><div class="drawing-transform"><img class="drawing-image" alt="原始图纸对照" draggable="false"/></div></div><div class="compare-note"><span>01 / 原始建筑平面图</span><p>滚轮缩放，拖动查看细节。左侧模型可独立旋转与俯视。</p></div></aside>
+ </div>
+ <div class="bottom-bar"><div class="legend"><span><i class="legend-wall"></i>墙体</span><span><i class="legend-wood"></i>居住空间</span><span><i class="legend-glass"></i>玻璃</span></div><div class="navigation-tip"><span>拖动旋转</span><b>·</b><span>滚轮缩放</span><b>·</b><span>右键平移</span></div><button id="help-button" class="help-button" title="操作指南"><svg><use href="#i-info"/></svg><span>操作指南</span></button></div>
+</main>
+</div>
+<footer class="footer"><div><span class="footer-dot"></span>参考级模型<span class="footer-divider">/</span>非施工或实测依据</div><div><span>层高 <b id="storey-display">3.00 m</b><em>估算</em></span><span class="footer-divider">/</span><span id="scale-status">40.0 px/m</span><span class="footer-divider">/</span><span id="mesh-count">— 个网格</span></div><span class="footer-brand">AXIS / ARCHITECTURAL STUDIES</span></footer>
+<div id="toast" role="status" aria-live="polite"></div>
+<dialog id="accuracy-modal" class="modal"><div class="modal-head"><span class="eyebrow">MODEL NOTES</span><button data-close class="icon-button" aria-label="关闭"><svg><use href="#i-close"/></svg></button></div><h2>关于这份重建</h2><p class="modal-intro">空间关系来自图纸，未知尺寸保持透明。</p><div id="assumptions-list" class="assumptions"></div><div class="modal-foot">这不是“已验证的完美复原”。精确校准需要清晰原图、DWG 或实测尺寸。</div></dialog>
+<dialog id="calibration-modal" class="modal"><div class="modal-head"><span class="eyebrow">CALIBRATION</span><button data-close class="icon-button" aria-label="关闭"><svg><use href="#i-close"/></svg></button></div><h2>尺寸与层高校准</h2><p class="modal-intro">更新比例会统一缩放平面，层高独立调整。墙线位置仍需核验。</p><div class="input-grid"><label>层高 <small>m · 估算</small><input id="storey-input" type="number" min="2.3" max="4.5" step=".05" value="3.0"/></label><label>图纸比例 <small>px / m</small><input id="ppm-input" type="number" min="15" max="100" step=".1" value="40"/></label></div><div class="reference-calc"><h3>用一段已知长度换算</h3><div class="input-grid"><label>截图中的像素长度<input id="reference-pixels" type="number" value="66" min="1"/></label><label>实际标注长度 · mm<input id="reference-mm" type="number" value="1650" min="1"/></label></div><p>默认取点近似参照阳台 1650 mm 标注，不代表完成测量。</p><button id="calculate-ppm" class="button secondary">计算比例</button></div><button id="apply-calibration" class="button primary full-width">应用并重建<svg><use href="#i-arrow"/></svg></button></dialog>
+<dialog id="export-modal" class="modal"><div class="modal-head"><span class="eyebrow">TAKE THE SPACE WITH YOU</span><button data-close class="icon-button" aria-label="关闭"><svg><use href="#i-close"/></svg></button></div><h2>导出你的空间</h2><p class="modal-intro">继续在其他三维工具中编辑，或保存当前视角。</p><button id="export-glb" class="export-row"><span class="export-file">GLB</span><span><strong>完整三维模型</strong><small>完整墙高 · 米制 · 分组网格与基础材质</small></span><svg><use href="#i-down"/></svg></button><button id="export-png" class="export-row"><span class="export-file">PNG</span><span><strong>当前三维视角</strong><small>仅画布图像，不含界面和房间文字标注</small></span><svg><use href="#i-down"/></svg></button><button id="export-json" class="export-row"><span class="export-file">JSON</span><span><strong>图纸参数与描摹数据</strong><small>墙线、洞口、房间轮廓及校准参数</small></span><svg><use href="#i-down"/></svg></button><p class="modal-foot">GLB 导出全部区域，包含示意家具和门窗，不受当前图层开关影响。标签、标尺与底图不写入模型。</p></dialog>
+<dialog id="help-modal" class="modal"><div class="modal-head"><span class="eyebrow">QUICK GUIDE</span><button data-close class="icon-button" aria-label="关闭"><svg><use href="#i-close"/></svg></button></div><h2>用你熟悉的方式探索</h2><div class="help-grid"><h3>桌面</h3><p>左键拖动旋转；滚轮缩放；右键或 Shift + 左键拖动平移。俯视模式下，左键拖动直接平移。</p><h3>触屏</h3><p>单指旋转，双指缩放和平移。点选房间查看图纸面积；左上角菜单打开图层与墙高面板。</p><h3>快捷键</h3><p><kbd>1</kbd> 三维　<kbd>2</kbd> 俯视　<kbd>3</kbd> 左户　<kbd>4</kbd> 右户<br/><kbd>R</kbd> 重置　<kbd>M</kbd> 测距　<kbd>Esc</kbd> 退出测距</p><h3>阅读模型</h3><p>“图上”指向图纸上方，不代表地理北向。参考尺寸基于当前比例，不能用于施工、定制柜体或安全判断。</p></div></dialog>
+<script src="https://cdn.jsdelivr.net/npm/three@0.140.2/build/three.min.js" crossorigin="anonymous"></script>
+<script>if(!window.THREE){document.write('<script src="https://unpkg.com/three@0.140.2/build/three.min.js"><\/script>')}</script>
+<script>window.BLUEPRINT_PARTS=[];</script>
+<script src="./bp1.js"></script>
+<script src="./bp2.js"></script>
+<script src="./bp3.js"></script>
+<script src="./bp4.js"></script>
+<script src="./bp5.js"></script>
+<script src="./bp6.js"></script>
+<script src="./bp7.js"></script>
+<script src="./bp8.js"></script>
+<script>window.BLUEPRINT="data:image/jpeg;base64,"+window.BLUEPRINT_PARTS.join("");delete window.BLUEPRINT_PARTS;</script>
+<script src="./plan.js"></script>
+<script src="./app.js"></script>
+</body>
+</html>
